@@ -1,2 +1,2 @@
 # gochess
-A simple game engine in chess.
+A simple chess engine in go.
