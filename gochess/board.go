@@ -38,7 +38,7 @@ type square struct {
 
 // this structe represents the state of a piece on board
 type piece struct {
-	Color         colorType // color white or black
+	color         colorType // color white or black
 	pieceValue    pieceType // what type of piece is it
 	squarePointer *square   // pointer to square it lies on, null if out of board
 }
@@ -46,7 +46,7 @@ type piece struct {
 // constructor to create new piece
 func NewPeiece(color colorType, value pieceType, squarePointer *square) *piece {
 	newPiece := new(piece)
-	newPiece.Color = color
+	newPiece.color = color
 	newPiece.pieceValue = value
 	newPiece.squarePointer = squarePointer
 	return newPiece
@@ -55,7 +55,7 @@ func NewPeiece(color colorType, value pieceType, squarePointer *square) *piece {
 // this structed mantains the state of the chess board at any point in time
 type BoardState struct {
 	squares     [numberOfSquares]square // represents the 64 squares and their state
-	WhitePieces []*piece                // reperesents white pieces on board and their states
+	whitePieces []*piece                // reperesents white pieces on board and their states
 	blackPieces []*piece                // reperesents white pieces on board and their states
 }
 
@@ -64,7 +64,7 @@ func getStingForPiece(p *piece) string {
 	if p == nil {
 		return "  -  "
 	}
-	if p.Color == white {
+	if p.color == white {
 		switch p.pieceValue {
 		case pawn:
 			return "  P  "
@@ -120,40 +120,40 @@ func (b *BoardState) init() {
 	//initilize the white pieces. first two rows.
 	rooka1 := NewPeiece(white, rook, &b.squares[0])
 	b.squares[0].piecePointer = rooka1
-	b.WhitePieces = append(b.WhitePieces, rooka1)
+	b.whitePieces = append(b.whitePieces, rooka1)
 
 	rookh1 := NewPeiece(white, rook, &b.squares[7])
 	b.squares[7].piecePointer = rookh1
-	b.WhitePieces = append(b.WhitePieces, rookh1)
+	b.whitePieces = append(b.whitePieces, rookh1)
 
 	knightb1 := NewPeiece(white, knight, &b.squares[1])
 	b.squares[1].piecePointer = knightb1
-	b.WhitePieces = append(b.WhitePieces, knightb1)
+	b.whitePieces = append(b.whitePieces, knightb1)
 
 	knightg1 := NewPeiece(white, knight, &b.squares[6])
 	b.squares[6].piecePointer = knightg1
-	b.WhitePieces = append(b.WhitePieces, knightg1)
+	b.whitePieces = append(b.whitePieces, knightg1)
 
 	bishopc1 := NewPeiece(white, bishop, &b.squares[2])
 	b.squares[2].piecePointer = bishopc1
-	b.WhitePieces = append(b.WhitePieces, bishopc1)
+	b.whitePieces = append(b.whitePieces, bishopc1)
 
 	bishopf1 := NewPeiece(white, bishop, &b.squares[5])
 	b.squares[5].piecePointer = bishopf1
-	b.WhitePieces = append(b.WhitePieces, bishopf1)
+	b.whitePieces = append(b.whitePieces, bishopf1)
 
 	queend1 := NewPeiece(white, queen, &b.squares[3])
 	b.squares[3].piecePointer = queend1
-	b.WhitePieces = append(b.WhitePieces, queend1)
+	b.whitePieces = append(b.whitePieces, queend1)
 
 	kinge1 := NewPeiece(white, king, &b.squares[4])
 	b.squares[4].piecePointer = kinge1
-	b.WhitePieces = append(b.WhitePieces, kinge1)
+	b.whitePieces = append(b.whitePieces, kinge1)
 
 	for i := 8; i < 16; i++ {
 		pawn := NewPeiece(white, pawn, &b.squares[i])
 		b.squares[i].piecePointer = pawn
-		b.blackPieces = append(b.WhitePieces, pawn)
+		b.blackPieces = append(b.whitePieces, pawn)
 	}
 
 	//initilize the black pieces. last two rows.
