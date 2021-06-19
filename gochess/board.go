@@ -3,54 +3,7 @@ package gochess
 
 import "fmt"
 
-//TODO: remove this
-func Display() {
-	fmt.Printf("From board!")
-}
-
 const numberOfSquares int = 64
-
-// enum to represent piece type
-type pieceType int8
-
-const (
-	pawn pieceType = iota
-	bishop
-	knight
-	rook
-	queen
-	king
-)
-
-//enum to represent color of piece
-type colorType bool
-
-const (
-	white colorType = true
-	black colorType = false
-)
-
-// represents the state of a square on board
-type square struct {
-	id           int    // used to represent the position of square 0-63
-	piecePointer *piece // pointer to a piece lying on it, if any
-}
-
-// this structe represents the state of a piece on board
-type piece struct {
-	color         colorType // color white or black
-	pieceValue    pieceType // what type of piece is it
-	squarePointer *square   // pointer to square it lies on, null if out of board
-}
-
-// constructor to create new piece
-func NewPeiece(color colorType, value pieceType, squarePointer *square) *piece {
-	newPiece := new(piece)
-	newPiece.color = color
-	newPiece.pieceValue = value
-	newPiece.squarePointer = squarePointer
-	return newPiece
-}
 
 // this structed mantains the state of the chess board at any point in time
 type BoardState struct {
@@ -59,57 +12,20 @@ type BoardState struct {
 	blackPieces []*piece                // reperesents white pieces on board and their states
 }
 
-// converts pieve value to string for display
-func getStingForPiece(p *piece) string {
-	if p == nil {
-		return "  -  "
-	}
-	if p.color == white {
-		switch p.pieceValue {
-		case pawn:
-			return "  P  "
-		case rook:
-			return "  R  "
-		case knight:
-			return "  N  "
-		case bishop:
-			return "  B  "
-		case queen:
-			return "  Q  "
-		case king:
-			return "  K  "
-		}
-	} else {
-		switch p.pieceValue {
-		case pawn:
-			return " _P_ "
-		case rook:
-			return " _R_ "
-		case knight:
-			return " _N_ "
-		case bishop:
-			return " _B_ "
-		case queen:
-			return " _Q_ "
-		case king:
-			return " _K_ "
-		}
-	}
-	return "  -  "
-}
-
 // display the board in console
 func (b *BoardState) Display() {
 	rowStartIndexs := [...]int{56, 48, 40, 32, 24, 16, 8, 0}
+	fmt.Print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
 			fmt.Print(getStingForPiece(b.squares[rowStartIndexs[i]+j].piecePointer))
 		}
 		fmt.Println("")
 	}
+	fmt.Print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 }
 
-// initilize the board state
+// initilize the board state with a new game position
 func (b *BoardState) init() {
 
 	//initilize the IDs
@@ -194,6 +110,50 @@ func (b *BoardState) init() {
 		b.squares[i].piecePointer = pawn
 		b.blackPieces = append(b.blackPieces, pawn)
 	}
+}
+
+// return a deep copy of self
+func (b *BoardState) GetCopyOfState() *BoardState {
+	newBoardCopy := *b
+	newBoardCopy.whitePieces = make([]*piece, 0)
+	newBoardCopy.blackPieces = make([]*piece, 0)
+
+	//TODO: can this be parallalized?
+	for i := 0; i < 64; i++ {
+		oldPiece := b.squares[i].piecePointer
+		if oldPiece != nil {
+			newPiece := NewPeiece(oldPiece.color, oldPiece.pieceValue, &newBoardCopy.squares[i])
+			newBoardCopy.squares[i].piecePointer = newPiece
+			if newPiece.color == white {
+				newBoardCopy.whitePieces = append(newBoardCopy.whitePieces, newPiece)
+			} else {
+				newBoardCopy.blackPieces = append(newBoardCopy.blackPieces, newPiece)
+			}
+		} else {
+			newBoardCopy.squares[i].piecePointer = nil
+		}
+	}
+	return &newBoardCopy
+}
+
+// returns a new board state with the move made
+func (b *BoardState) MakeNextMove(initSquate int, finalSquare int) *BoardState {
+	newState := b.GetCopyOfState()
+	//TODO: make a move here in the new state
+	return newState
+}
+
+// returns the next board states with nextPlay colors turn
+func (b *BoardState) GetNextStates(nextPlay colorType) []BoardState {
+	nextStates := []BoardState{}
+
+	if nextPlay == white {
+		//iterate over all white pieces wp // this could trigger a go routine
+		//for each wp, iterate over all legal moves // this could further trigger a go routine
+	} else {
+
+	}
+	return nextStates
 }
 
 func NewBoardState() *BoardState {
