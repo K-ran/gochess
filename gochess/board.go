@@ -123,6 +123,8 @@ func (b *BoardState) GetCopyOfState() *BoardState {
 		oldPiece := b.squares[i].piecePointer
 		if oldPiece != nil {
 			newPiece := NewPeiece(oldPiece.color, oldPiece.pieceValue, &newBoardCopy.squares[i])
+			newPiece.pseudoLegalMoves = make([]int, len(oldPiece.pseudoLegalMoves))
+			copy(newPiece.pseudoLegalMoves, oldPiece.pseudoLegalMoves)
 			newBoardCopy.squares[i].piecePointer = newPiece
 			if newPiece.color == white {
 				newBoardCopy.whitePieces = append(newBoardCopy.whitePieces, newPiece)
@@ -136,22 +138,56 @@ func (b *BoardState) GetCopyOfState() *BoardState {
 	return &newBoardCopy
 }
 
+func (b *BoardState) removePiece(removePiece *piece) {
+	if removePiece.color == white {
+		for i, v := range b.whitePieces {
+			if removePiece == v {
+				b.whitePieces[len(b.whitePieces)-1], b.whitePieces[i] = b.whitePieces[i], b.whitePieces[len(b.whitePieces)-1]
+				b.whitePieces = b.whitePieces[:len(b.whitePieces)-1]
+				return
+			}
+		}
+	} else {
+		for i, v := range b.blackPieces {
+			if removePiece == v {
+				b.blackPieces[len(b.blackPieces)-1], b.blackPieces[i] = b.blackPieces[i], b.blackPieces[len(b.whitePieces)-1]
+				b.blackPieces = b.blackPieces[:len(b.blackPieces)-1]
+				return
+			}
+		}
+	}
+}
+
 // returns a new board state with the move made
-func (b *BoardState) MakeNextMove(initSquate int, finalSquare int) *BoardState {
+func (b *BoardState) MakeNextMove(nextMove move) *BoardState {
 	newState := b.GetCopyOfState()
-	//TODO: make a move here in the new state
+	pieceToBeMoved := newState.squares[nextMove.from].piecePointer
+	pieceToBeCaptured := newState.squares[nextMove.to].piecePointer
+	newState.squares[nextMove.from].piecePointer = nil
+	newState.squares[nextMove.to].piecePointer = pieceToBeMoved
+	pieceToBeMoved.squarePointer = &newState.squares[nextMove.to]
+	if pieceToBeCaptured != nil {
+		newState.removePiece(pieceToBeCaptured)
+		pieceToBeCaptured.squarePointer = nil
+	}
 	return newState
 }
 
 // returns the next board states with nextPlay colors turn
-func (b *BoardState) GetNextStates(nextPlay colorType) []BoardState {
-	nextStates := []BoardState{}
-
+func (b *BoardState) GetNextStates(nextPlay colorType) []*BoardState {
+	nextStates := []*BoardState{}
 	if nextPlay == white {
-		//iterate over all white pieces wp // this could trigger a go routine
-		//for each wp, iterate over all legal moves // this could further trigger a go routine
+		for _, p := range b.whitePieces {
+			for _, nextMove := range p.pseudoLegalMoves {
+				nextStates = append(nextStates, b.MakeNextMove(move{p.squarePointer.id, nextMove}))
+			}
+		}
 	} else {
-
+		for _, p := range b.blackPieces {
+			for _, nextMove := range p.pseudoLegalMoves {
+				nextStates = append(nextStates, b.MakeNextMove(move{p.squarePointer.id, nextMove}))
+			}
+		}
 	}
 	return nextStates
 }
