@@ -18,7 +18,7 @@ func (b *BoardState) Display() {
 	fmt.Print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
-			fmt.Print(getStingForPiece(b.squares[rowStartIndexs[i]+j].piecePointer))
+			fmt.Print(b.squares[rowStartIndexs[i]+j].piecePointer)
 		}
 		fmt.Println("")
 	}
@@ -69,7 +69,7 @@ func (b *BoardState) init() {
 	for i := 8; i < 16; i++ {
 		pawn := NewPeiece(white, pawn, &b.squares[i])
 		b.squares[i].piecePointer = pawn
-		b.blackPieces = append(b.whitePieces, pawn)
+		b.whitePieces = append(b.whitePieces, pawn)
 	}
 
 	//initilize the black pieces. last two rows.
@@ -156,8 +156,38 @@ func (b *BoardState) GetNextStates(nextPlay colorType) []BoardState {
 	return nextStates
 }
 
+// returns true if no piece on the square
+func (b *BoardState) isSquareEmpty(position int) bool {
+	return b.squares[position].piecePointer == nil
+}
+
+// first value true of opposite color piece on square, second value true if square non empty
+func (b *BoardState) isSquareOppositeColor(position int, c colorType) (bool, bool) {
+	if !b.isSquareEmpty(position) {
+		if b.squares[position].piecePointer.color != c {
+			return true, true
+		} else {
+			return false, true
+		}
+	}
+	return false, false
+}
+
+// calculates all pseudo legal moves
+func (b *BoardState) evaluateAllPseudoLegalMoves() {
+	for i := 0; i < len(b.whitePieces); i++ {
+		b.whitePieces[i].calculatePseudoLegalMoves(b)
+	}
+	for i := 0; i < len(b.blackPieces); i++ {
+		b.blackPieces[i].calculatePseudoLegalMoves(b)
+	}
+}
+
+// return new board state object
 func NewBoardState() *BoardState {
 	board := new(BoardState)
 	board.init()
+	board.evaluateAllPseudoLegalMoves()
+	fmt.Print(board.squares[8].piecePointer.pseudoLegalMoves)
 	return board
 }
